@@ -1,13 +1,15 @@
 package se.jensen.yuki.webshop_admin.model;
 
 public class Appliance extends Product {
+    private String brand;
 
     public Appliance() {
         // For JSON Reader
     }
 
-    public Appliance(String productName, int price, int inventoryQuantity) {
-        super(productName, price, inventoryQuantity);
+    public Appliance(String title, int price, String description, String brand) {
+        super(title, price, description);
+        this.brand = brand;
     }
 
     @Override
@@ -21,13 +23,13 @@ public class Appliance extends Product {
     }
 
     @Override
-    public int getInventoryQuantity() {
-        return super.getInventoryQuantity();
+    public String getDescription() {
+        return super.getDescription();
     }
 
     @Override
-    public void setInventoryQuantity(int inventoryQuantity) {
-        super.setInventoryQuantity(inventoryQuantity);
+    public void setDescription(String description) {
+        super.setDescription(description);
     }
 
     @Override
@@ -41,17 +43,33 @@ public class Appliance extends Product {
     }
 
     @Override
-    public String getProductName() {
-        return super.getProductName();
+    public String getTitle() {
+        return super.getTitle();
     }
 
     @Override
-    public void setProductName(String productName) {
-        super.setProductName(productName);
+    public void setTitle(String title) {
+        super.setTitle(title);
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 
     @Override
-    public String category() {
-        return Category.APPLIANCE.getString();
+    public Category category() {
+        return Category.APPLIANCE;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString()
+                + "Brand: " + brand + "\n"
+                + "Description: \n" + super.getDescription()
+                + "\n**************************************\n";
     }
 }

@@ -1,1 +1,17 @@
-[{"id":"5ed7502f-4fe7-4908-aa35-b64077875fb5","username":"Yuki","password":"pass"},{"id":"59e57b21-d5cd-486a-b0ae-f812c65d5df9","username":"Håkan","password":"pass"},{"id":"f7d8d51d-faff-4b1c-b3a1-51fe2202590f","username":"Emil","password":"pass"}]
+[
+  {
+    "id": "1",
+    "username": "Yuki",
+    "password": "pass"
+  },
+  {
+    "id": "2",
+    "username": "Håkan",
+    "password": "pass"
+  },
+  {
+    "id": "3",
+    "username": "Emil",
+    "password": "pass"
+  }
+]

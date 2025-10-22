@@ -1,6 +1,10 @@
 package se.jensen.yuki.webshop_admin.ui;
 
+import java.util.List;
 import java.util.Scanner;
+
+import static se.jensen.yuki.webshop_admin.model.PromptText.MAIN_MENU;
+import static se.jensen.yuki.webshop_admin.model.PromptText.START_MENU;
 
 public class ConsoleUI implements Ui {
     Scanner scanner;
@@ -21,17 +25,23 @@ public class ConsoleUI implements Ui {
     }
 
     @Override
+    public void info(List<String> messages) {
+        StringBuilder sb = new StringBuilder();
+        for (String message : messages) {
+            sb.append(message + "\n");
+        }
+        System.out.println(sb);
+    }
+
+    @Override
     public String menu() {
-        System.out.println("""
-                **** Web Shop Admin Menu ***
-                1. Add a product
-                2. Show all products
-                3. Show the information of a product
-                4. Quit Menu
-                
-                Enter from 1 - 4
-                """);
+        System.out.println(MAIN_MENU);
         return scanner.nextLine();
     }
 
+    @Override
+    public String startMenu() {
+        System.out.println(START_MENU);
+        return scanner.nextLine();
+    }
 }

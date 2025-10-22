@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JsonFileReader {
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
-    public static <T> List<T> readJson(Path filePath, Class<T> tClass) {
+    public <T> List<T> readJson(Path filePath, Class<T> tClass) {
         List<T> returnList = new ArrayList<>();
         try {
             CollectionType listType = mapper.getTypeFactory().constructCollectionType(List.class, tClass);

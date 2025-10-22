@@ -1,10 +1,9 @@
 package se.jensen.yuki.webshop_admin.model;
 
-import java.util.UUID;
-
 public class User {
-    /** Serial number for user */
-    private String id;
+    private static long counter = 0;
+    /** ID for user */
+    private long id;
     /** Username */
     private String username;
     /** Password */
@@ -23,7 +22,7 @@ public class User {
      * @param password
      */
     public User(String username, String password) {
-        this.id = UUID.randomUUID().toString();
+        this.id = ++counter;
         this.username = username;
         this.password = password;
     }
@@ -44,7 +43,7 @@ public class User {
      *
      * @return id
      */
-    public String getId() {
+    public long getId() {
         return id;
     }
 
@@ -54,7 +53,7 @@ public class User {
      *
      * @param id
      */
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -92,5 +91,9 @@ public class User {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public static void updateCounter(long numberOfUsers) {
+        counter = numberOfUsers;
     }
 }

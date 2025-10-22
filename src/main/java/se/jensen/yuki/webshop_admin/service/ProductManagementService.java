@@ -1,39 +1,52 @@
 package se.jensen.yuki.webshop_admin.service;
 
+import se.jensen.yuki.webshop_admin.model.ErrorMessage;
 import se.jensen.yuki.webshop_admin.model.Product;
 import se.jensen.yuki.webshop_admin.repository.ProductRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ProductManagementService {
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     /**
      * Set the reference of the productList
      *
-     * @param productRepository
+     * @param productRepository is the repository for Product
      */
     public ProductManagementService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
+    /**
+     * @return
+     */
     public ProductRepository getProductRepository() {
         return productRepository;
     }
 
     public void addProduct(Product product) {
-        System.out.println("ProductManagementService.addProduct()");
-        //productRepository.add();
-
+        productRepository.addProduct(product);
     }
 
-    public List<Product> showAllProduct() {
-        System.out.println("ProductManagementService.showAllProduct()");
-        return productRepository.getProductList();
+    public List<String> showAllProduct() {
+        List<String> stringList = new ArrayList<>();
+        List<Product> productList = productRepository.getProductList();
+        for (Product product : productList) {
+            stringList.add(product.toString());
+        }
+
+        return stringList;
     }
 
-    public void showInformationOfProduct(String productName) {
-        System.out.println("ProductManagementService.showInformationOfProduct()");
+    public String showInformationOfProduct(String articleNumber) {
+        Optional<Product> optionalProduct = productRepository.findByArticleNumber(articleNumber);
+
+        return optionalProduct
+                .map(Object::toString)
+                .orElse(ErrorMessage.NO_SUCH_PRODUCT);
 
     }
 }

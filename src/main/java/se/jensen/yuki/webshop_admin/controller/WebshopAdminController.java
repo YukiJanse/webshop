@@ -1,113 +1,169 @@
 package se.jensen.yuki.webshop_admin.controller;
 
+import se.jensen.yuki.webshop_admin.factory.ProductFactory;
 import se.jensen.yuki.webshop_admin.model.*;
-import se.jensen.yuki.webshop_admin.repository.ProductRepository;
-import se.jensen.yuki.webshop_admin.repository.UserRepository;
 import se.jensen.yuki.webshop_admin.service.AuthService;
 import se.jensen.yuki.webshop_admin.service.ProductManagementService;
 import se.jensen.yuki.webshop_admin.ui.ConsoleUI;
+import se.jensen.yuki.webshop_admin.ui.DialogUi;
 import se.jensen.yuki.webshop_admin.ui.Ui;
-import se.jensen.yuki.webshop_admin.util.JsonFileReader;
-import se.jensen.yuki.webshop_admin.util.JsonFileWriter;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
-import static se.jensen.yuki.webshop_admin.model.FilePath.PRODUCT_JSON_FILE_PATH;
-import static se.jensen.yuki.webshop_admin.model.FilePath.USER_JSON_FILE_PATH;
-
 public class WebshopAdminController {
+    private static final String START_MENU_LOGIN = "1";
+    private static final String START_MENU_QUIT = "2";
+    private static final String MAIN_MENU_ADD_PRODUCT = "1";
+    private static final String MAIN_MENU_SHOW_ALL_PRODUCT = "2";
+    private static final String MAIN_MENU_SHOW_PRODUCT_INFO = "3";
+    private static final String MAIN_MENU_QUIT = "4";
     private final AuthService authService;
     private final ProductManagementService productManagementService;
 
-    public WebshopAdminController() {
-        AuthService tempAuthService;
-        ProductManagementService tempProductManagerService;
-        try {
-            tempAuthService = new AuthService(loadUserRepository());
-            tempProductManagerService = new ProductManagementService(loadProductRepository());
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            tempAuthService = new AuthService(new UserRepository(new ArrayList<User>()));
-            tempProductManagerService = new ProductManagementService(new ProductRepository(new ArrayList<Product>()));
-        }
-        authService = tempAuthService;
-        productManagementService = tempProductManagerService;
+    public WebshopAdminController(AuthService authService, ProductManagementService productManagementService) {
+        this.authService = authService;
+        this.productManagementService = productManagementService;
     }
 
 
     /**
      * Run all logic for the web shop admin app
      */
-    public void run() {
+    public void run(String uiOption) {
         boolean isRunnning = true;
         Scanner scanner = new Scanner(System.in);
-        Ui ui = new ConsoleUI(scanner);
-        System.out.println(productManagementService.getProductRepository().getProductList());
-        saveRepository();
+        Ui ui = switch (uiOption) {
+            case "dialog" -> new DialogUi();
+            default -> new ConsoleUI(scanner);
+        };
         while (isRunnning) {
-            boolean isLoggedIn = false;
-            // Login logic
-            while (!authService.isLoggedIn()) {
-                try {
-                    String username = ui.prompt(PromptText.LOGIN_USERNAME_PROMPT);
-                    String password = ui.prompt(PromptText.LOGIN_PASSWORD_PROMPT);
-                    // Authenticate user
-                    if (authService.login(username, password)) {
-                        ui.info(PromptText.LOGIN_SUCCESS);
-                    } else {
-                        ui.info(ErrorMessage.LOGIN_FAIL);
-                    }
-                } catch (NullPointerException e) {
-                    ui.info(ErrorMessage.NO_USER_LIST);
-                    /** DO SOMETHING TO QUIT THE APP **/
-                }
+            String choice = ui.startMenu();
+            if (choice.equals(START_MENU_LOGIN)) {
+                // Login
+                login(ui);
+                // Start the main menu
+                mainMenu(ui);
+                // Logout
+                logout();
+            } else if (choice.equals(START_MENU_QUIT)) {
+                isRunnning = false;
+            } else {
+                ui.info(ErrorMessage.START_MENU_CHOICE);
             }
-            boolean isUserOnMenu = true;
-            while (isUserOnMenu) {
-                String choice = ui.menu();
-                switch (choice) {
-                    case "1" -> productManagementService.addProduct(new Book()); // Add a new product
-                    case "2" -> productManagementService.showAllProduct(); // Show all products
-                    case "3" ->
-                            productManagementService.showInformationOfProduct("new Book()"); // Show the information of a product
-                    case "4" -> isUserOnMenu = false; // Quit Menu
-                    default -> ui.info(ErrorMessage.MENU_CHOICE);
-                }
-            }
-            authService.logout();
         }
         scanner.close();
     }
 
     /**
-     * Fills up User data in UserRepository
+     * Asks the user product category to add.
+     *
+     * @param ui is to ask user and showing information.
+     * @return Category
      */
-    private UserRepository loadUserRepository() {
-/*
-        return new UserRepository(
-                List.of(
-                        new User("Yuki", "pass"),
-                        new User("Håkan", "pass"),
-                        new User("Emil", "pass")
-                )
-        );*/
-        return new UserRepository(JsonFileReader.readJson(FilePath.USER_JSON_FILE_PATH, User.class));
+    private Category askCategory(Ui ui) {
+        String input = "";
+        Category category = null;
+        boolean isAsking = true;
+        while (isAsking) {
+            input = ui.prompt(PromptText.PRODUCT_CATEGORY_PROMPT);
+            try {
+                // If the user input a bigger number than Category.values() or not a number
+                // it sends an exception
+                category = Category.values()[Integer.parseInt(input)];
+                isAsking = false;
+            } catch (Exception e) {
+                ui.info(ErrorMessage.PRODUCT_CATEGORY);
+            }
+        }
+        return category;
     }
 
-    private ProductRepository loadProductRepository() {
-        /*return new ProductRepository(
-                List.of(
-                        new Cloth("Hat", 1000, 10),
-                        new Appliance("Fridge", 2000, 5),
-                        new Book("Dictionary", 500, 20)
-                )
-        );*/
-        return new ProductRepository(JsonFileReader.readJson(FilePath.PRODUCT_JSON_FILE_PATH, Product.class));
+    /**
+     * Asks user product info and returns a Map with ProductField and values.
+     *
+     * @param productFieldList is to create a Product-instans dynamically.
+     * @param ui               is to ask user product info.
+     * @return a Map with ProductField and values.
+     */
+    private Map<ProductField, String> inputProductInfo(List<ProductField> productFieldList, Ui ui) {
+        Map<ProductField, String> input = new HashMap<>();
+        for (ProductField field : productFieldList) {
+            boolean isNotValid = true;
+            String userInput = "";
+            while (isNotValid) {
+                try {
+                    userInput = ui.prompt(PromptText.ADD_PRODUCT_PROMPT + field.getFieldName());
+                    // parseValue checks whether the value is convertable to the correct type
+                    // validate() checks mostly the range of the value
+                    isNotValid = !field.validate(field.parseValue(userInput));
+                    if (isNotValid) {
+                        ui.info(ErrorMessage.INVALID_PRODUCT_VALUE + field.getValidateErrorMessage());
+                    }
+                } catch (IllegalArgumentException e) {
+                    ui.info(ErrorMessage.INVALID_PRODUCT_VALUE + field.getValidateErrorMessage());
+                }
+            }
+            input.put(field, userInput);
+        }
+        return input;
     }
 
-    private void saveRepository() {
-        JsonFileWriter.writeJsonFile(USER_JSON_FILE_PATH, authService.getUserRepository().getUserList());
-        JsonFileWriter.writeJsonFile(PRODUCT_JSON_FILE_PATH, productManagementService.getProductRepository().getProductList(), Product.class);
+    /**
+     * Asks login info and Authenticates that.
+     *
+     * @param ui is to ask user login info.
+     */
+    private void login(Ui ui) {
+        boolean isLoggedIn = false;
+        // Login logic
+        while (!authService.isLoggedIn()) {
+            try {
+                String username = ui.prompt(PromptText.LOGIN_USERNAME_PROMPT);
+                String password = ui.prompt(PromptText.LOGIN_PASSWORD_PROMPT);
+                // Authenticate user
+                if (authService.login(username, password)) {
+                    ui.info(PromptText.LOGIN_SUCCESS);
+                } else {
+                    ui.info(ErrorMessage.LOGIN_FAIL);
+                }
+            } catch (NullPointerException e) {
+                ui.info(ErrorMessage.NO_USER_LIST);
+            }
+        }
+    }
+
+    /**
+     * Logouts current user.
+     */
+    private void logout() {
+        authService.logout();
+    }
+
+    /**
+     * Shows mainMenu and do what user chose
+     *
+     * @param ui is to ask user
+     */
+    private void mainMenu(Ui ui) {
+        boolean isUserOnMenu = true;
+        while (isUserOnMenu) {
+            String choice = ui.menu();
+            switch (choice) {
+                case MAIN_MENU_ADD_PRODUCT -> {
+                    Category category = askCategory(ui);
+                    Product targetProduct = (Product) ProductFactory.createProduct(category, inputProductInfo(category.getFieldList(), ui));
+                    productManagementService.addProduct(targetProduct);
+                } // Add a new product
+                case MAIN_MENU_SHOW_ALL_PRODUCT ->
+                        ui.info(productManagementService.showAllProduct()); // Show all products
+                case MAIN_MENU_SHOW_PRODUCT_INFO ->
+                        ui.info(productManagementService.showInformationOfProduct(ui.prompt(PromptText.PRODUCT_INFORMATION_PROMPT))); // Show the information of a product
+                case MAIN_MENU_QUIT -> isUserOnMenu = false; // Quit Menu
+                default -> ui.info(ErrorMessage.MENU_CHOICE);
+            }
+        }
     }
 }

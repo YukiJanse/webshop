@@ -1,20 +1,25 @@
 package se.jensen.yuki.webshop_admin.repository;
 
+import se.jensen.yuki.webshop_admin.dao.UserDao;
 import se.jensen.yuki.webshop_admin.model.User;
 
 import java.util.List;
 import java.util.Optional;
 
 public class UserRepository {
+    private final UserDao dao;
     private List<User> userList;
 
     /**
      * Constructor
-     *
-     * @param userList
      */
-    public UserRepository(List<User> userList) {
-        this.userList = userList;
+    public UserRepository(UserDao dao) {
+        this.dao = dao;
+        try {
+            this.userList = dao.loadAll();
+        } catch (RuntimeException e) {
+            System.out.println("Failed initializing UserFileRepository: " + e.getMessage());
+        }
     }
 
     /**
@@ -33,6 +38,10 @@ public class UserRepository {
      */
     public void setUserList(List<User> userList) {
         this.userList = userList;
+    }
+
+    public void saveRepositoryToFile() {
+        dao.save(userList);
     }
 
     /**

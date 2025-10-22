@@ -16,19 +16,19 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public abstract class Product {
     private static long counter = 0;
     private String articleNumber;
-    private String productName;
+    private String title;
     private int price;
-    private int inventoryQuantity;
+    private String description;
 
     public Product() {
         // For JSON Reader
     }
 
-    public Product(String productName, int price, int inventoryQuantity) {
+    public Product(String title, int price, String description) {
         this.articleNumber = createId();
-        this.productName = productName;
+        this.title = title;
         this.price = price;
-        this.inventoryQuantity = inventoryQuantity;
+        this.description = description;
     }
 
     public static long getCounter() {
@@ -47,12 +47,12 @@ public abstract class Product {
         this.articleNumber = articleNumber;
     }
 
-    public int getInventoryQuantity() {
-        return inventoryQuantity;
+    public String getDescription() {
+        return description;
     }
 
-    public void setInventoryQuantity(int inventoryQuantity) {
-        this.inventoryQuantity = inventoryQuantity;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public int getPrice() {
@@ -63,15 +63,21 @@ public abstract class Product {
         this.price = price;
     }
 
-    public String getProductName() {
-        return productName;
+    public String getTitle() {
+        return title;
     }
 
-    public void setProductName(String productName) {
-        this.productName = productName;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public abstract String category();
+    public void initArticleNumberIfNull() {
+        if (articleNumber == null) {
+            articleNumber = createId();
+        }
+    }
+
+    public abstract Category category();
 
     private String createId() {
         return "P-" + (++counter);
@@ -82,8 +88,17 @@ public abstract class Product {
      *
      * @param id
      */
-    public void updateCounter(long id) {
+    public static void updateCounter(long id) {
         counter = id;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n**************************************\n")
+                .append("Article number: " + articleNumber + "\n")
+                .append("Title: " + title + "\n")
+                .append("Price: " + price + "\n");
+        return sb.toString();
     }
 
 }

@@ -1,13 +1,15 @@
 package se.jensen.yuki.webshop_admin.model;
 
 public class Cloth extends Product {
+    private String size;
 
     public Cloth() {
         // For JSON Reader
     }
 
-    public Cloth(String productName, int price, int inventoryQuantity) {
-        super(productName, price, inventoryQuantity);
+    public Cloth(String title, int price, String description, String size) {
+        super(title, price, description);
+        this.size = size;
     }
 
     @Override
@@ -21,13 +23,13 @@ public class Cloth extends Product {
     }
 
     @Override
-    public int getInventoryQuantity() {
-        return super.getInventoryQuantity();
+    public String getDescription() {
+        return super.getDescription();
     }
 
     @Override
-    public void setInventoryQuantity(int inventoryQuantity) {
-        super.setInventoryQuantity(inventoryQuantity);
+    public void setDescription(String description) {
+        super.setDescription(description);
     }
 
     @Override
@@ -41,17 +43,33 @@ public class Cloth extends Product {
     }
 
     @Override
-    public String getProductName() {
-        return super.getProductName();
+    public String getTitle() {
+        return super.getTitle();
     }
 
     @Override
-    public void setProductName(String productName) {
-        super.setProductName(productName);
+    public void setTitle(String title) {
+        super.setTitle(title);
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
     }
 
     @Override
-    public String category() {
-        return Category.CLOTH.getString();
+    public Category category() {
+        return Category.CLOTH;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString()
+                + "Size: " + size + "\n"
+                + "Description: \n" + super.getDescription()
+                + "\n**************************************\n";
     }
 }
