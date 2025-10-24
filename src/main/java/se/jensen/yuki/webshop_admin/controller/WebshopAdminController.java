@@ -1,7 +1,11 @@
 package se.jensen.yuki.webshop_admin.controller;
 
+import se.jensen.yuki.webshop_admin.constants.ErrorMessage;
+import se.jensen.yuki.webshop_admin.constants.PromptText;
 import se.jensen.yuki.webshop_admin.factory.ProductFactory;
-import se.jensen.yuki.webshop_admin.model.*;
+import se.jensen.yuki.webshop_admin.model.Category;
+import se.jensen.yuki.webshop_admin.model.Product;
+import se.jensen.yuki.webshop_admin.model.ProductField;
 import se.jensen.yuki.webshop_admin.service.AuthService;
 import se.jensen.yuki.webshop_admin.service.ProductManagementService;
 import se.jensen.yuki.webshop_admin.ui.ConsoleUI;
@@ -20,6 +24,7 @@ public class WebshopAdminController {
     private static final String MAIN_MENU_SHOW_ALL_PRODUCT = "2";
     private static final String MAIN_MENU_SHOW_PRODUCT_INFO = "3";
     private static final String MAIN_MENU_QUIT = "4";
+    private static final String QUIT_MENU_YES = "1";
     private final AuthService authService;
     private final ProductManagementService productManagementService;
 
@@ -41,7 +46,12 @@ public class WebshopAdminController {
         };
         while (isRunnning) {
             String choice = ui.startMenu();
-            if (choice.equals(START_MENU_LOGIN)) {
+            if (choice == null) {
+                choice = ui.prompt(PromptText.QUIT_MENU);
+                if (choice != null && choice.equals(QUIT_MENU_YES)) {
+                    isRunnning = false;
+                }
+            } else if (choice.equals(START_MENU_LOGIN)) {
                 // Login
                 login(ui);
                 // Start the main menu
@@ -153,15 +163,26 @@ public class WebshopAdminController {
             String choice = ui.menu();
             switch (choice) {
                 case MAIN_MENU_ADD_PRODUCT -> {
-                    Category category = askCategory(ui);
-                    Product targetProduct = (Product) ProductFactory.createProduct(category, inputProductInfo(category.getFieldList(), ui));
-                    productManagementService.addProduct(targetProduct);
+                    try {
+                        Category category = askCategory(ui);
+                        Product targetProduct = (Product) ProductFactory.createProduct(category, inputProductInfo(category.getFieldList(), ui));
+                        productManagementService.addProduct(targetProduct);
+                        ui.info(PromptText.SUCCESSEd_ADD_PRODUCT);
+                    } catch (RuntimeException e) {
+                        ui.info(ErrorMessage.FAILED_ADD_PRODUCT + e.getMessage());
+                    }
                 } // Add a new product
                 case MAIN_MENU_SHOW_ALL_PRODUCT ->
                         ui.info(productManagementService.showAllProduct()); // Show all products
                 case MAIN_MENU_SHOW_PRODUCT_INFO ->
                         ui.info(productManagementService.showInformationOfProduct(ui.prompt(PromptText.PRODUCT_INFORMATION_PROMPT))); // Show the information of a product
                 case MAIN_MENU_QUIT -> isUserOnMenu = false; // Quit Menu
+                case null -> {
+                    choice = ui.prompt(PromptText.QUIT_MENU);
+                    if (choice.equals(QUIT_MENU_YES)) {
+                        isUserOnMenu = false;
+                    }
+                }
                 default -> ui.info(ErrorMessage.MENU_CHOICE);
             }
         }

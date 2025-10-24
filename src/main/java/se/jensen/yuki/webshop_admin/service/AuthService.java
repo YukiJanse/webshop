@@ -5,6 +5,10 @@ import se.jensen.yuki.webshop_admin.repository.UserRepository;
 
 import java.util.Optional;
 
+/**
+ * Service class responsible for handling authentication operations such as login,
+ * logout, and retrieving login status of the current user.
+ */
 public class AuthService {
     private UserRepository userRepository;
     private User loggedInUser;

@@ -7,7 +7,7 @@ import se.jensen.yuki.webshop_admin.util.JsonFileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static se.jensen.yuki.webshop_admin.model.FilePath.PRODUCT_JSON_FILE_PATH;
+import static se.jensen.yuki.webshop_admin.constants.FilePath.PRODUCT_JSON_FILE_PATH;
 
 public class ProductFileDao implements ProductDao {
     private final JsonFileReader fileReader = new JsonFileReader();

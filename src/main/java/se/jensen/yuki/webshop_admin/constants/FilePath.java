@@ -1,4 +1,4 @@
-package se.jensen.yuki.webshop_admin.model;
+package se.jensen.yuki.webshop_admin.constants;
 
 import java.nio.file.Path;
 

@@ -7,7 +7,7 @@ import se.jensen.yuki.webshop_admin.util.JsonFileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static se.jensen.yuki.webshop_admin.model.FilePath.USER_JSON_FILE_PATH;
+import static se.jensen.yuki.webshop_admin.constants.FilePath.USER_JSON_FILE_PATH;
 
 public class UserFileDao implements UserDao {
     private final JsonFileWriter fileWriter = new JsonFileWriter();

@@ -6,6 +6,10 @@ import se.jensen.yuki.webshop_admin.model.User;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository class for managing and interacting with User data.
+ * Provides methods to initialize, retrieve, search, and save user data.
+ */
 public class UserRepository {
     private final UserDao dao;
     private List<User> userList;

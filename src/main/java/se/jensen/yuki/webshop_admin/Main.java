@@ -25,7 +25,6 @@ public class Main {
             uiOption = args[0].toLowerCase();
             daoOption = args[1].toLowerCase();
         }
-        System.out.println("UI option: " + uiOption + "\nDAO option: " + daoOption);
         WebshopAdminController controller = new WebshopAdminController(
                 new AuthService(new UserRepository(daoOption.equals("file") ? new UserFileDao() : new UserDbDao(USER_DB_URL, USER_DB_USER, USER_DB_PASS))),
                 new ProductManagementService(new ProductRepository(

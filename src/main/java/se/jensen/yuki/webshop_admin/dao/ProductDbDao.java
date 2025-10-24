@@ -9,6 +9,16 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The ProductDbDao class is an implementation of the ProductDao interface. It interacts with
+ * a relational database to perform operations such as loading all products from the
+ * database and saving a list of products to the database.
+ * This class supports different types of products, including Cloth, Book,
+ * and Appliance, which are derived from the abstract Product class.
+ * The type of product is determined dynamically during database operations.
+ * The database connection is established using JDBC, with connection details such as
+ * URL, username, and password provided during the object construction.
+ */
 public class ProductDbDao implements ProductDao {
     private final String url;
     private final String user;
@@ -22,16 +32,42 @@ public class ProductDbDao implements ProductDao {
     private static final int AUTHOR = 7;
     private static final int BRAND = 8;
 
+    /**
+     * Constructs a ProductDbDao instance for interacting with the product database.
+     *
+     * @param url      the database URL
+     * @param user     the database username
+     * @param password the database password
+     */
     public ProductDbDao(String url, String user, String password) {
         this.url = url;
         this.user = user;
         this.password = password;
     }
 
+    /**
+     * Establishes and returns a connection to the database using the configured
+     * database URL, username, and password.
+     *
+     * @return a {@code Connection} object representing the connection to the database
+     * @throws SQLException if a database access error occurs or the connection could``` notjava be
+     *                      established/**
+     */
     private Connection connect() throws SQLException {
         return DriverManager.getConnection(url, user, password);
     }
 
+    /**
+     * Loads all products from the database and returns them as a list of Product objects.
+     * Each product is categorized as a specific subclass (e.g., Cloth, Appliance, or Book)
+     * based on the type column in the database.
+     * This method establishes a connection to the database, executes a query to fetch all
+     * records from the "product" table, and maps the result set to Product instances.
+     * If an error occurs during the database interaction, it is logged to the console.
+     *
+     * @return a list of Product objects representing all products in the database.
+     * The list may include objects of subclasses such as Cloth, Appliance, or Book.
+     */
     @Override
     public List<Product> loadAll() {
         List<Product> products = new ArrayList<>();
@@ -45,19 +81,19 @@ public class ProductDbDao implements ProductDao {
                 Product p = switch (type) {
                     case "cloth" -> new Cloth(
                             rs.getString("title"),
-                            rs.getInt("price"),
+                            rs.getDouble("price"),
                             rs.getString("description"),
                             rs.getString("size")
                     );
                     case "appliance" -> new Appliance(
                             rs.getString("title"),
-                            rs.getInt("price"),
+                            rs.getDouble("price"),
                             rs.getString("description"),
                             rs.getString("brand")
                     );
                     case "book" -> new Book(
                             rs.getString("title"),
-                            rs.getInt("price"),
+                            rs.getDouble("price"),
                             rs.getString("description"),
                             rs.getString("author")
                     );
@@ -73,6 +109,16 @@ public class ProductDbDao implements ProductDao {
         return products;
     }
 
+    /**
+     * Saves a list of products to the database. Each product is inserted into the
+     * "product" table based on its type (e.g., Cloth, Book, or Appliance). Products
+     * of each type provide specific values for corresponding attributes such as size,
+     * author, or brand. Duplicate entries are ignored based on the article number.
+     *
+     * @param productList the list of products to be saved. Each product should be
+     *                    an instance of a subclass of {@code Product}
+     *                    (e.g., {@code Cloth}, {@code Book}, or {@code Appliance}).
+     */
     @Override
     public void save(List<Product> productList) {
 
@@ -84,7 +130,7 @@ public class ProductDbDao implements ProductDao {
                 ps.setString(TYPE, product.category().getString());
                 ps.setString(ARTICLE_NUMBER, product.getArticleNumber());
                 ps.setString(TITLE, product.getTitle());
-                ps.setInt(PRICE, product.getPrice());
+                ps.setDouble(PRICE, product.getPrice());
                 ps.setString(DESCRIPTION, product.getDescription());
                 if (product instanceof Cloth cloth) {
                     ps.setString(SIZE, cloth.getSize());
