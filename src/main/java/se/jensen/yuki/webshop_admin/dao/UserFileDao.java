@@ -22,7 +22,7 @@ public class UserFileDao implements UserDao {
                 User.updateCounter(userList.size());
             }
         } catch (RuntimeException e) {
-            System.out.println("Failed initializing UserRepository: " + e.getMessage());
+            throw new RuntimeException("Failed initializing UserRepository: " + e.getMessage());
         }
         return userList;
     }

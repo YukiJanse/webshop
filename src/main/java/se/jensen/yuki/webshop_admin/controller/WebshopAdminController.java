@@ -48,6 +48,7 @@ public class WebshopAdminController {
             String choice = ui.startMenu();
             if (choice == null) {
                 choice = ui.prompt(PromptText.QUIT_MENU);
+                // If user presses cancel or close button
                 if (choice != null && choice.equals(QUIT_MENU_YES)) {
                     isRunnning = false;
                 }
@@ -165,7 +166,8 @@ public class WebshopAdminController {
                 case MAIN_MENU_ADD_PRODUCT -> {
                     try {
                         Category category = askCategory(ui);
-                        Product targetProduct = (Product) ProductFactory.createProduct(category, inputProductInfo(category.getFieldList(), ui));
+                        Map<ProductField, String> input = inputProductInfo(category.getFieldList(), ui);
+                        Product targetProduct = (Product) ProductFactory.createProduct(category, input);
                         productManagementService.addProduct(targetProduct);
                         ui.info(PromptText.SUCCESSEd_ADD_PRODUCT);
                     } catch (RuntimeException e) {
@@ -174,15 +176,17 @@ public class WebshopAdminController {
                 } // Add a new product
                 case MAIN_MENU_SHOW_ALL_PRODUCT ->
                         ui.info(productManagementService.showAllProduct()); // Show all products
-                case MAIN_MENU_SHOW_PRODUCT_INFO ->
-                        ui.info(productManagementService.showInformationOfProduct(ui.prompt(PromptText.PRODUCT_INFORMATION_PROMPT))); // Show the information of a product
+                case MAIN_MENU_SHOW_PRODUCT_INFO -> {
+                    String articleNumber = ui.prompt(PromptText.PRODUCT_INFORMATION_PROMPT);
+                    ui.info(productManagementService.showInformationOfProduct(articleNumber));
+                } // Show the information of a product
                 case MAIN_MENU_QUIT -> isUserOnMenu = false; // Quit Menu
                 case null -> {
                     choice = ui.prompt(PromptText.QUIT_MENU);
                     if (choice.equals(QUIT_MENU_YES)) {
                         isUserOnMenu = false;
                     }
-                }
+                } // If user presses cancel or close button
                 default -> ui.info(ErrorMessage.MENU_CHOICE);
             }
         }

@@ -11,27 +11,27 @@ import se.jensen.yuki.webshop_admin.service.AuthService;
 import se.jensen.yuki.webshop_admin.service.ProductManagementService;
 
 public class Main {
-    private static final String PRODUCT_DB_URL = "jdbc:mysql://localhost:3306/product_db";
-    private static final String PRODUCT_DB_USER = "admin";
-    private static final String PRODUCT_DB_PASS = "pass";
-    private static final String USER_DB_URL = "jdbc:mysql://localhost:3306/product_db";
-    private static final String USER_DB_USER = "admin";
-    private static final String USER_DB_PASS = "pass";
 
     public static void main(String[] args) {
         String uiOption = "console";
         String daoOption = "file";
-        if (args.length > 0) {
+        if (args.length == 2) {
             uiOption = args[0].toLowerCase();
             daoOption = args[1].toLowerCase();
+        } else {
+            System.out.println("Application runs as default mode. If you want set options, it must be [UiOption DaoOption]");
         }
-        WebshopAdminController controller = new WebshopAdminController(
-                new AuthService(new UserRepository(daoOption.equals("file") ? new UserFileDao() : new UserDbDao(USER_DB_URL, USER_DB_USER, USER_DB_PASS))),
-                new ProductManagementService(new ProductRepository(
-                        daoOption.equals("file") ? new ProductFileDao() : new ProductDbDao(PRODUCT_DB_URL, PRODUCT_DB_USER, PRODUCT_DB_PASS)
-                ))
-        );
-        controller.run(uiOption);
+        try {
+            WebshopAdminController controller = new WebshopAdminController(
+                    new AuthService(new UserRepository(daoOption.equals("file") ? new UserFileDao() : new UserDbDao())),
+                    new ProductManagementService(new ProductRepository(
+                            daoOption.equals("file") ? new ProductFileDao() : new ProductDbDao()
+                    ))
+            );
+            controller.run(uiOption);
+        } catch (RuntimeException e) {
+            System.out.println("Application startup failed: " + e.getMessage());
+        }
 
         System.out.println("Application is closing...");
     }

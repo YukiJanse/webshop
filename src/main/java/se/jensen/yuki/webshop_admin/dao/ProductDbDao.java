@@ -4,6 +4,7 @@ import se.jensen.yuki.webshop_admin.model.Appliance;
 import se.jensen.yuki.webshop_admin.model.Book;
 import se.jensen.yuki.webshop_admin.model.Cloth;
 import se.jensen.yuki.webshop_admin.model.Product;
+import se.jensen.yuki.webshop_admin.util.ConfigurationManager;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -20,9 +21,6 @@ import java.util.List;
  * URL, username, and password provided during the object construction.
  */
 public class ProductDbDao implements ProductDao {
-    private final String url;
-    private final String user;
-    private final String password;
     private static final int TYPE = 1;
     private static final int ARTICLE_NUMBER = 2;
     private static final int TITLE = 3;
@@ -34,27 +32,9 @@ public class ProductDbDao implements ProductDao {
 
     /**
      * Constructs a ProductDbDao instance for interacting with the product database.
-     *
-     * @param url      the database URL
-     * @param user     the database username
-     * @param password the database password
      */
-    public ProductDbDao(String url, String user, String password) {
-        this.url = url;
-        this.user = user;
-        this.password = password;
-    }
+    public ProductDbDao() {
 
-    /**
-     * Establishes and returns a connection to the database using the configured
-     * database URL, username, and password.
-     *
-     * @return a {@code Connection} object representing the connection to the database
-     * @throws SQLException if a database access error occurs or the connection could``` notjava be
-     *                      established/**
-     */
-    private Connection connect() throws SQLException {
-        return DriverManager.getConnection(url, user, password);
     }
 
     /**
@@ -72,7 +52,7 @@ public class ProductDbDao implements ProductDao {
     public List<Product> loadAll() {
         List<Product> products = new ArrayList<>();
         String sql = "SELECT * FROM product";
-        try (Connection con = connect();
+        try (Connection con = ConfigurationManager.getInstance().getConnection();
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -122,7 +102,7 @@ public class ProductDbDao implements ProductDao {
     @Override
     public void save(List<Product> productList) {
 
-        try (Connection con = connect();
+        try (Connection con = ConfigurationManager.getInstance().getConnection();
              PreparedStatement ps = con.prepareStatement(
                      "INSERT IGNORE INTO product (type, article_number, title, price, description, size, author, brand) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
              )) {

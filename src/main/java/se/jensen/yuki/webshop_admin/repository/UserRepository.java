@@ -22,7 +22,7 @@ public class UserRepository {
         try {
             this.userList = dao.loadAll();
         } catch (RuntimeException e) {
-            System.out.println("Failed initializing UserFileRepository: " + e.getMessage());
+            throw new RuntimeException("Failed initializing UserFileRepository: " + e.getMessage());
         }
     }
 
